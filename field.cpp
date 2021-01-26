@@ -7,18 +7,18 @@
 
 
 /* ================================= CONSTATNS ============================== */
-enum field_type { IP=0, PORT, GENERIC };
-#define SRC_IP_PAT 'src-ip'
-#define DST_IP_PAT 'dst-ip'
-#define SRC_PORT_PAT 'src-port'
-#define DST_PORT_PAT 'dst-port'
-#define EQ_SIGN '='
-#define COMMA_SIGN ','
-
+/*enum field_type { IP=0, PORT = 1, GENERIC = 2 };*/
+#define SRC_IP_PAT "src-ip"
+#define DST_IP_PAT "dst-ip"
+#define SRC_PORT_PAT "src-port"
+#define DST_PORT_PAT "dst-port"
+#define EQ_SIGN "="
+#define COMMA_SIGN ","
+using namespace std;
 
 /* ========================================================================== */
 
-/* ============================ FUNC DECLARATION ============================ */
+/* ============================ FUNC DECLARATION ============================ 
 Field::Field(String pattern, field_type type);
 Field::Field(String pattern);
 Field::~Field();
@@ -27,7 +27,7 @@ bool Field::set_value(String val);
 bool Field::match_value(String val) const;
 bool Field::match(String packet);
 
-/* ========================================================================== */
+   ========================================================================== */
 
 /**
  * @ brief Initiates a Field with pattern and type
@@ -45,8 +45,11 @@ Field::Field(String pattern, field_type type):
  * @ Constructor
  * @ param pattern: A String object to initialize into this pattern
  */
-Field::Field(String pattern):
-	pattern(pattern.trim()){
+Field::Field(String pattern){
+	String temp_pat = pattern.trim();
+	this->pattern = temp_pat;
+	cout<<"PRINTING IN FIELD CONSTRUCTOR DOR"<<endl;
+	this->pattern.print();
 	if (this->pattern.equals(SRC_IP_PAT) || this->pattern.equals(DST_IP_PAT)){
 		type = IP;
 	}else if(this->pattern.equals(SRC_PORT_PAT) ||
@@ -115,23 +118,23 @@ bool Field::match_value(String val) const{
  * @ return: True if value matched, false if not.
  */
 bool Field::match(String packet){
-	String **comma_split;
-	String **eq_split;
-	size_t *num_after_com;	//Number of strings after splitting by ','
-	size_t *num_after_eq;	//Number of strings after splitting by '='
-	packet.split(COMMA_SIGN, comma_split, num_after_com);
+	String *comma_split;
+	String *eq_split;
+	size_t num_after_com;	//Number of strings after splitting by ','
+	size_t num_after_eq;	//Number of strings after splitting by '='
+	packet.split(COMMA_SIGN, &comma_split, &num_after_com);
 	bool return_val = false;
 	/*First we check if the pattern matches the field's pattern.
 	e.g. if the field is 'src-port' packet should begin with 'src-port'*/
-	for (int i = 0; i < *num_after_com; i++){
-		comma_split[i]->split(EQ_SIGN, eq_split, num_after_eq);
-		if(sizeof(short) != *num_after_eq){
+	for (size_t i = 0; i < num_after_com; i++){
+		comma_split[i].split(EQ_SIGN, &eq_split, &num_after_eq);
+		if(sizeof(short) != num_after_eq){
 			//If number of '=' in field was different that 1.
 			continue;
 		}
 
-		if(this->pattern.equals(eq_split[0]->trim())){//If pattern matches
-			return_val = this->match_value(eq_split[1]->trim());
+		if(this->pattern.equals(eq_split[0].trim())){//If pattern matches
+			return_val = this->match_value(eq_split[1].trim());
 		}
 		delete[] eq_split;
 	}

@@ -4,14 +4,14 @@
 #include "string.h"
 
 /* ================================= CONSTATNS ============================== */
-#define END_OF_STRING '/0'
+#define END_OF_STRING "\0"
 #define SPACE ' '
 
 
 
 /* ========================================================================== */
 
-/* ============================ FUNC DECLARATION ============================ */
+/* ============================ FUNC DECLARATION ============================= 
 String::String();
 String::String(const String &str);
 String::String(const char *str);
@@ -25,14 +25,15 @@ String String::trim() const;
 int to_integer() const;
 
 
-/* ========================================================================== */
+   ========================================================================== */
+using namespace std;
 
 /**
  * @ brief Initiates an empty string
  * @ Default Constructor
  */
 String::String(){
-	str.data = new char[1];
+	data = new char[1];
 	strncpy(data, END_OF_STRING, 1);
 	length = 0;
 }
@@ -44,21 +45,15 @@ String::String(){
  */
 String::String(const String &str){
 	/*First we check that input is valid' if it is NULL we return empty String*/
-	if(NULL == str){
-		std::cerr << "Tried cloning NULL";
+	length = str.length;
+	if(0 == length){
+		data = new char[1];
 		strncpy(data, END_OF_STRING, 1);
-		length = 0;
-
 	}else{
-		length = str.length;
-		if(0 == length){
-			str.data = new char[1];
-			strncpy(data, END_OF_STRING, 1);
-		}else{
-			str.data = new char[length + 1];
-			strncpy(data, str.data, length + 1);
-		}
+		data = new char[length + 1];
+		strncpy(data, str.data, length + 1);
 	}
+	std::cout<<"DOR - type recieved is  "<<str.data<<std::endl;
 }
 
 /**
@@ -72,9 +67,12 @@ String::String(const char *str){
 		data = new char[1];
 		strncpy(data, END_OF_STRING, 1);
 	}else{
-		str.data = new char[length + 1];
+		data = new char[length + 1];
 		strncpy(data, str, length + 1);
 	}
+	cout<<"\nDATA reciever was "<<str<<endl;
+	cout<<"DOR THIS IS str CONSTRUCTOR"<<endl;
+	cout<<"DOR THIS IS THE DATA\n "<<this->data<<endl;
 }
 
 /**
@@ -90,16 +88,23 @@ String::~String(){
  * @ param str: A pointer to the string we wish to copy into data
  */
 String& String::operator=(const char *str){
+	cout<<"DOR THIS IS = with STR"<<endl;
 	if(NULL == str){
 		std::cerr << "Tried cloning NULL";
+	}
+	if(&str == &(this->data)){
+		return *this;
 	}
 	/*Free old String*/
 	/*We can use delete without checking because a String object will
 	always have at least '/0' in data*/
-	delete[] data;
+	cout<<this->length<<endl;
+	cout<<"DORRRRR2222222"<<endl;
+	delete[] this->data;	
 	length = strlen(str);
 	data = new char[length + 1];
 	strncpy(data, str, length + 1);
+	cout<<"DOR THIS IS DATA "<<this->data<<endl;
 	return *this;
 }
 
@@ -107,9 +112,9 @@ String& String::operator=(const char *str){
  * @brief Changes this from String
  * @param rhs: a referance to String we wish to copy
  */
-String& string::operator=(const String &rhs){
-	if(NULL == rhs){
-		std::cerr << "Tried cloning NULL";
+String& String::operator=(const String &rhs){
+	if(&rhs == this){
+		return *this;
 	}
 	/*Free old String*/
 	delete[] data;
@@ -173,8 +178,8 @@ void String::split(const char *delimiters, String **output, size_t *size) const{
 	}
 	size_t start_idx = 0;
 	size_t end_idx = 0;
-	size_t str_count = 0;
-	size_t num_of_delimeters = len(delimiters);
+	size_t str_count = 1;
+	size_t num_of_delimeters = strlen(delimiters);
 	int flag = 0;
 	int ch_num = 0;	  /*Indiccates size of a String*/
 	int delim_flag = 0;/*Indicates if there was a match in this iteration*/
@@ -182,18 +187,18 @@ void String::split(const char *delimiters, String **output, size_t *size) const{
 	if(NULL == output){
 		flag = 1;	//No need to allocate memory
 	}else{
-		*output = new String[(length/sizeof(short)) + 1];
+		*output = new String[((this->length)/sizeof(short)) + 1];
 		/*Worst case there will be len/2 + 1 Strings after splitting*/
 	}
 
 	/*Method of work - We will go over the data char by char, then for each
 	char we will check if it matches a delimeter. If so, we will break to a
 	String if needed. If flag=1 we won't put it in output, else we will*/
-	while(data[end_idx] != END_OF_STRING){
+	while(strncmp(&data[end_idx], END_OF_STRING, 1) != 0){
 		delim_flag = 0;
-		for(int delim = 0; delim < num_of_delimeters; delim++){
+		for(size_t delim = 0; delim < num_of_delimeters; delim++){
 			//Check if cahr equals to delimeter
-			if(0 == strncmp(data[end_idx], delimiters[delim], 1)){
+			if(data[end_idx] == delimiters[delim]){
 				delim_flag = 1;
 				//First, check if substring is not empty
 				if(start_idx == end_idx){
@@ -209,9 +214,9 @@ void String::split(const char *delimiters, String **output, size_t *size) const{
 				}
 				ch_num = end_idx - start_idx;
 				char *str_to_cpy = new char[ch_num + 1];
-				strncpy(str_to_cpy, data[start_idx], ch_num);
-				strncpy(str_to_cpy[ch_num], END_OF_STRING, 1);
-				output[str_count - 1] = new String(str_to_cpy);
+				strncpy(str_to_cpy, &data[start_idx], ch_num);
+				strncpy(&str_to_cpy[ch_num], END_OF_STRING, 1);
+				*output[str_count - sizeof(short)] = String(str_to_cpy);
 				delete[] str_to_cpy;
 				end_idx++;
 				start_idx = end_idx;
@@ -223,10 +228,20 @@ void String::split(const char *delimiters, String **output, size_t *size) const{
 		}
     }//closes while
 
-    if(str_count == 0){//No delimeters found
-    	str_count++;
-    }
     *size = str_count;
+    //Make sure to insert last string that remains
+    if(flag == 0){
+    	output[0]->print();
+	    ch_num = end_idx - start_idx;
+		char *str_to_cpy_end = new char[ch_num + 1];
+		strncpy(str_to_cpy_end, &data[start_idx], ch_num);
+		strncpy(&str_to_cpy_end[ch_num], END_OF_STRING, 1);
+		//output[str_count - 1] = new String(str_to_cpy);
+		(*output)[str_count - 1] = String(str_to_cpy_end);
+		//*output[str_count - 1] = str_to_cpy_end;
+		delete[] str_to_cpy_end;
+	}
+
 }
 
 
@@ -236,10 +251,10 @@ void String::split(const char *delimiters, String **output, size_t *size) const{
  */
 String String::trim() const{
 	int start_idx = 0;
-	int end_idx = lenght - 1;
+	int end_idx = length - 1;
 	if(length == 0){	/*Return an empty String object*/
 		String ret_str;
-		return re_str;
+		return ret_str;
 	}
 
 	while(data[start_idx] == SPACE){
@@ -249,11 +264,11 @@ String String::trim() const{
 	while(data[end_idx] == SPACE){
 		end_idx--;
 	}
-	int ch_num = end_idx - start_idx;
-	str_to_cpy = new char [ch_num + 1];
-	strncpy(str_to_cpy, data[start_idx], ch_num);
-	str_to_cpy[ch_num + 1] = END_OF_STRING;
-	String str_ret(data[])
+	int ch_num = end_idx - start_idx + 1;
+	char *str_to_cpy = new char [ch_num + 1];
+	strncpy(str_to_cpy, &data[start_idx], ch_num);
+	strncpy(&str_to_cpy[ch_num + 1], END_OF_STRING, 1);
+	String str_ret(str_to_cpy);
 	delete[] str_to_cpy;
 	return str_ret;
 }
@@ -261,18 +276,12 @@ String String::trim() const{
 /**
  * @brief Try to convert this to an integer. Returns 0 on error.
  */
-int to_integer() const{
+int String::to_integer() const{
 	if(length == 0){
 		return 0;	//FAIL
 	}
 	return atoi(data);
 }
-
-
-
-
-
-
 
 
 

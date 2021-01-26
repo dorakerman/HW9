@@ -6,18 +6,19 @@
 #include "port.h"
 
 /* ================================= CONSTATNS ============================== */
-enum {PORT = 1, MAX_RANGE = 65535};
-#define HYP_SIGN '-'
+enum {MAX_RANGE = 65535};
+#define HYP_SIGN "-"
+#define END_OF_STRING "\0"
 
 
 /* ========================================================================== */
 
-/* ============================ FUNC DECLARATION ============================ */
+/* ============================ FUNC DECLARATION ============================ 
 Port::Port(String pattern);
 bool Port::set_value(String val);
 bool Port::match_value(String val) const;
 
-/* ========================================================================== */
+   ========================================================================== */
 
 /**
  * @ brief Initiates a Port with Field with pattern and type=PORT(1)
@@ -37,19 +38,19 @@ Port::Port(String pattern):
  * @ return: Returns true if input parsing suceeded, else false.
  */
 bool Port::set_value(String val){
-	if(val.length == 0){ //If Empty String.
+	if(val.equals(END_OF_STRING)){ //If Empty String.
 		return false;
 	}
-	String **hyp_split;
-	size_t *num_after_hyp;//Number of strings after splitting by '-'
-	val.split(HYP_SIGN, hyp_split, num_after_hyp);
+	String *hyp_split;
+	size_t num_after_hyp;//Number of strings after splitting by '-'
+	val.split(HYP_SIGN, &hyp_split, &num_after_hyp);
 	if(sizeof(short) != num_after_hyp){
 		//If number of '-' was differen than 1
 		delete[] hyp_split;
 		return false;	//(Invalid)
 	}
-	for(int i=0;i < sizeof(short); i++){
-		range[i] = hyp_split[i]->trim().to_integer();
+	for(size_t i=0;i < sizeof(short); i++){
+		range[i] = hyp_split[i].trim().to_integer();
 	}
 	delete[] hyp_split;
 	if(range[0]>range[1]){
@@ -66,7 +67,7 @@ bool Port::set_value(String val){
  * @ return: True if value matched, false if not.
  */
 bool Port::match_value(String val) const{
-	if(val.length == 0){ //If Empty String.
+	if(val.equals(END_OF_STRING)){ //If Empty String.
 		return false;
 	}
 	int value = val.trim().to_integer();
