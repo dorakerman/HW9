@@ -53,7 +53,6 @@ String::String(const String &str){
 		data = new char[length + 1];
 		strncpy(data, str.data, length + 1);
 	}
-	std::cout<<"DOR - type recieved is  "<<str.data<<std::endl;
 }
 
 /**
@@ -70,9 +69,6 @@ String::String(const char *str){
 		data = new char[length + 1];
 		strncpy(data, str, length + 1);
 	}
-	cout<<"\nDATA reciever was "<<str<<endl;
-	cout<<"DOR THIS IS str CONSTRUCTOR"<<endl;
-	cout<<"DOR THIS IS THE DATA\n "<<this->data<<endl;
 }
 
 /**
@@ -88,7 +84,6 @@ String::~String(){
  * @ param str: A pointer to the string we wish to copy into data
  */
 String& String::operator=(const char *str){
-	cout<<"DOR THIS IS = with STR"<<endl;
 	if(NULL == str){
 		std::cerr << "Tried cloning NULL";
 	}
@@ -98,13 +93,10 @@ String& String::operator=(const char *str){
 	/*Free old String*/
 	/*We can use delete without checking because a String object will
 	always have at least '/0' in data*/
-	cout<<this->length<<endl;
-	cout<<"DORRRRR2222222"<<endl;
 	delete[] this->data;	
 	length = strlen(str);
 	data = new char[length + 1];
 	strncpy(data, str, length + 1);
-	cout<<"DOR THIS IS DATA "<<this->data<<endl;
 	return *this;
 }
 
@@ -216,7 +208,7 @@ void String::split(const char *delimiters, String **output, size_t *size) const{
 				char *str_to_cpy = new char[ch_num + 1];
 				strncpy(str_to_cpy, &data[start_idx], ch_num);
 				strncpy(&str_to_cpy[ch_num], END_OF_STRING, 1);
-				*output[str_count - sizeof(short)] = String(str_to_cpy);
+				(*output)[str_count - sizeof(short)] = String(str_to_cpy);
 				delete[] str_to_cpy;
 				end_idx++;
 				start_idx = end_idx;
@@ -231,7 +223,6 @@ void String::split(const char *delimiters, String **output, size_t *size) const{
     *size = str_count;
     //Make sure to insert last string that remains
     if(flag == 0){
-    	output[0]->print();
 	    ch_num = end_idx - start_idx;
 		char *str_to_cpy_end = new char[ch_num + 1];
 		strncpy(str_to_cpy_end, &data[start_idx], ch_num);

@@ -46,10 +46,7 @@ Field::Field(String pattern, field_type type):
  * @ param pattern: A String object to initialize into this pattern
  */
 Field::Field(String pattern){
-	String temp_pat = pattern.trim();
-	this->pattern = temp_pat;
-	cout<<"PRINTING IN FIELD CONSTRUCTOR DOR"<<endl;
-	this->pattern.print();
+	this->pattern = pattern.trim();
 	if (this->pattern.equals(SRC_IP_PAT) || this->pattern.equals(DST_IP_PAT)){
 		type = IP;
 	}else if(this->pattern.equals(SRC_PORT_PAT) ||
@@ -65,7 +62,7 @@ Field::Field(String pattern){
  * @ Destructor
  */
 Field::~Field(){
-	pattern.~String();
+	//pattern.~String();
 }
 
 
@@ -130,6 +127,7 @@ bool Field::match(String packet){
 		comma_split[i].split(EQ_SIGN, &eq_split, &num_after_eq);
 		if(sizeof(short) != num_after_eq){
 			//If number of '=' in field was different that 1.
+			delete[] eq_split;
 			continue;
 		}
 
