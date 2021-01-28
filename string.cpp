@@ -88,7 +88,7 @@ String& String::operator=(const char *str){
 		std::cerr << "Tried cloning NULL";
 	}
 	if(&str == &(this->data)){
-		return *this;
+		return (*this);
 	}
 	/*Free old String*/
 	/*We can use delete without checking because a String object will
@@ -97,7 +97,7 @@ String& String::operator=(const char *str){
 	length = strlen(str);
 	data = new char[length + 1];
 	strncpy(data, str, length + 1);
-	return *this;
+	return (*this);
 }
 
 /**
@@ -106,14 +106,14 @@ String& String::operator=(const char *str){
  */
 String& String::operator=(const String &rhs){
 	if(&rhs == this){
-		return *this;
+		return (*this);
 	}
 	/*Free old String*/
 	delete[] data;
 	length = rhs.length;
 	data = new char[length + 1];
 	strncpy(data, rhs.data, length + 1);
-	return *this;
+	return (*this);
 }
 
 /**
@@ -168,29 +168,34 @@ void String::split(const char *delimiters, String **output, size_t *size) const{
 		std::cerr << "Delimiters are NULL";
 		return;
 	}
+	char *clone_delim = new char [strlen(delimiters) + 1];
 	size_t start_idx = 0;
 	size_t end_idx = 0;
 	size_t str_count = 1;
 	size_t num_of_delimeters = strlen(delimiters);
+	strncpy(clone_delim, delimiters, num_of_delimeters + 1);
 	int flag = 0;
 	int ch_num = 0;	  /*Indiccates size of a String*/
 	int delim_flag = 0;/*Indicates if there was a match in this iteration*/
 
+	char *clone_data = new char[(this->length + 1)];
+	strncpy(clone_data, data, (this->length + 1));
+
 	if(NULL == output){
 		flag = 1;	//No need to allocate memory
 	}else{
-		*output = new String[((this->length)/sizeof(short)) + 1];
+		(*output) = new String[((this->length)/sizeof(short)) + 1];
 		/*Worst case there will be len/2 + 1 Strings after splitting*/
 	}
 
 	/*Method of work - We will go over the data char by char, then for each
 	char we will check if it matches a delimeter. If so, we will break to a
 	String if needed. If flag=1 we won't put it in output, else we will*/
-	while(strncmp(&data[end_idx], END_OF_STRING, 1) != 0){
+	while(strncmp(&clone_data[end_idx], END_OF_STRING, 1) != 0){
 		delim_flag = 0;
 		for(size_t delim = 0; delim < num_of_delimeters; delim++){
 			//Check if cahr equals to delimeter
-			if(data[end_idx] == delimiters[delim]){
+			if(clone_data[end_idx] == clone_delim[delim]){
 				delim_flag = 1;
 				//First, check if substring is not empty
 				if(start_idx == end_idx){
@@ -206,7 +211,7 @@ void String::split(const char *delimiters, String **output, size_t *size) const{
 				}
 				ch_num = end_idx - start_idx;
 				char *str_to_cpy = new char[ch_num + 1];
-				strncpy(str_to_cpy, &data[start_idx], ch_num);
+				strncpy(str_to_cpy, &clone_data[start_idx], ch_num);
 				strncpy(&str_to_cpy[ch_num], END_OF_STRING, 1);
 				(*output)[str_count - sizeof(short)] = String(str_to_cpy);
 				delete[] str_to_cpy;
@@ -219,19 +224,18 @@ void String::split(const char *delimiters, String **output, size_t *size) const{
 			end_idx++;
 		}
     }//closes while
-
-    *size = str_count;
+    delete[] clone_delim;
+    (*size) = str_count;
     //Make sure to insert last string that remains
     if(flag == 0){
 	    ch_num = end_idx - start_idx;
 		char *str_to_cpy_end = new char[ch_num + 1];
-		strncpy(str_to_cpy_end, &data[start_idx], ch_num);
+		strncpy(str_to_cpy_end, &clone_data[start_idx], ch_num);
 		strncpy(&str_to_cpy_end[ch_num], END_OF_STRING, 1);
-		//output[str_count - 1] = new String(str_to_cpy);
 		(*output)[str_count - 1] = String(str_to_cpy_end);
-		//*output[str_count - 1] = str_to_cpy_end;
 		delete[] str_to_cpy_end;
 	}
+	delete[] clone_data;
 
 }
 
@@ -248,19 +252,24 @@ String String::trim() const{
 		return ret_str;
 	}
 
-	while(data[start_idx] == SPACE){
+	char *clone_data = new char[(this->length + 1)];
+	strncpy(clone_data, data, (this->length + 1));
+
+	while(clone_data[start_idx] == SPACE){
 		start_idx++;
 	}
 
-	while(data[end_idx] == SPACE){
+	while(clone_data[end_idx] == SPACE){
 		end_idx--;
 	}
+
 	int ch_num = end_idx - start_idx + 1;
 	char *str_to_cpy = new char [ch_num + 1];
-	strncpy(str_to_cpy, &data[start_idx], ch_num);
-	strncpy(&str_to_cpy[ch_num + 1], END_OF_STRING, 1);
+	strncpy(str_to_cpy, &clone_data[start_idx], ch_num);
+	strncpy(&str_to_cpy[ch_num], END_OF_STRING, 1);
 	String str_ret(str_to_cpy);
 	delete[] str_to_cpy;
+	delete[] clone_data;
 	return str_ret;
 }
 

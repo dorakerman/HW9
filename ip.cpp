@@ -5,6 +5,7 @@
 #include "ip.h"
 #include "port.h"
 
+using namespace std;
 /* ================================= CONSTATNS ============================== */
 enum {LST_BYTE = 24,MSB = 32,MAX_RANGE = 255};
 #define END_OF_STRING "\0"
@@ -47,10 +48,10 @@ bool Ip::set_value(String val){
 	String *dot_split;
 	size_t num_after_slash;//Number of strings after splitting by '\'
 	size_t num_after_dot;//Number of strings after splitting by '.'
-	int mask_num = 0;
+	unsigned int mask_num = 0;
 	unsigned int mask = 0;
 	unsigned int ip_hex = 0;	//We will turn IP address to hexa.
-	int segment = 0;  //We will use it to create IP num
+	unsigned int segment = 0;  //We will use it to create IP num
 	val.split(SLASH_SIGN, &slash_split, &num_after_slash);
 	if(sizeof(short) != num_after_slash){
 		//If number of '/' was differen than 1
@@ -59,7 +60,7 @@ bool Ip::set_value(String val){
 	}
 	/*Get mask number*/
 	mask_num = slash_split[1].trim().to_integer();
-	if(mask_num > MSB || mask_num < 0){
+	if(mask_num > MSB){
 		delete[] slash_split;
 		return false;	//(Invalid)
 	}
@@ -75,7 +76,7 @@ bool Ip::set_value(String val){
 
 	for(size_t i=0; i < sizeof(int); i++){
 		segment = dot_split[i].trim().to_integer();
-		if (segment < 0 || segment > MAX_RANGE){
+		if (segment > MAX_RANGE){
 			delete[] slash_split;
 			delete[] dot_split;
 			return false;	//(Invalid)
@@ -83,7 +84,15 @@ bool Ip::set_value(String val){
 		ip_hex |= (segment << (LST_BYTE - (sizeof(double) * i)));
 	}
 
-	mask = MAX_NUM >> mask_num;
+	mask = MAX_NUM >> (mask_num);
+
+	if(MSB == mask_num){
+		mask = 0;
+	}
+	//Mask num can not be zero and 32 at the same time
+	if(0 == mask_num){
+		mask = MAX_NUM;
+	}
 
 	/*e.g. set high -> let's say mask_num is 8 and ip_hex = 0xDA010203
 	mask = MAX_NUM >> 8 = 0x00FFFFFF -> ip_hex | mask = 0xDAFFFFFF*/
@@ -109,7 +118,7 @@ bool Ip::match_value(String val) const{
 	String *dot_split;
 	size_t num_after_dot;//Number of strings after splitting by '.'
 	unsigned int ip_hex = 0;	//We will turn IP address to hexa.
-	int segment = 0;  //We will use it to create IP num
+	unsigned int segment = 0;  //We will use it to create IP num
 
 	/*Split IP according to '.' sign without mask*/
 	val.split(DOT_SIGN, &dot_split, &num_after_dot);
@@ -121,7 +130,7 @@ bool Ip::match_value(String val) const{
 
 	for(size_t i=0; i < sizeof(int); i++){
 		segment = dot_split[i].trim().to_integer();
-		if (segment < 0 || segment > MAX_RANGE){
+		if (segment > MAX_RANGE){
 			delete[] dot_split;
 			return false;	//(Invalid)
 		}
