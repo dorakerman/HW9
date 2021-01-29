@@ -30,16 +30,25 @@ int main(int argc, char **argv){
 
 	if(IP == rule_type){
 		Ip *rule_ip = new Ip(eq_split[0]);
-		rule_ip->set_value(eq_split[1]);
+		if (false == rule_ip->set_value(eq_split[1])){
+			delete rule_ip;
+			delete[] eq_split;
+			return 1;
+		}
 		Field *rule = (Field*) rule_ip;
 		parse_input(*rule);
 		delete rule_ip;
 		delete[] eq_split;
 		return 0;
 	}
+
 	if(PORT == rule_type){
 		Port *rule_port = new Port(eq_split[0]);
-		rule_port->set_value(eq_split[1]);
+		if (false == rule_port->set_value(eq_split[1])){
+			delete rule_port;
+			delete[] eq_split;
+			return 1;
+		}
 		Field *rule = (Field*) rule_port;
 		parse_input(*rule);
 		delete rule_port;
@@ -49,6 +58,6 @@ int main(int argc, char **argv){
 	}
 	//If generic -  No need to parse
 	delete[] eq_split;
-	return 0;
+	return 1;
 
 }
